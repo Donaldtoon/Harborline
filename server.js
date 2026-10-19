@@ -1557,10 +1557,23 @@ app.use('/api', (_req, res) => {
 
 // Express 5-compatible fallback for frontend routes.
 // API requests have already been handled above.
-app.get('/{*path}', (req, res, next) => {
-  res.sendFile(path.join(__dirname, 'index.html'), error => {
-    if (error) next(error);
-  });
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) {
+        return next();
+    }
+
+    if (req.method !== 'GET') {
+        return next();
+    }
+
+    res.sendFile(
+        path.join(__dirname, '..', 'public', 'index.html'),
+        (err) => {
+            if (err) {
+                next(err);
+            }
+        }
+    );
 });
 
 // Central error handler
